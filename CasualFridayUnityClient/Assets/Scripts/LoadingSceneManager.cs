@@ -15,9 +15,5 @@ public class LoadingSceneManager : MonoBehaviour
 
         //Trying to load both scenes in advance was troublesome and I decided to leave it aside - described in more detail in AssetReferenceDatabase.cs
         await assetDatabase.LoadGameScene(false);
-
-        //When menu play button is pressed activate game scene
-        //await Task.Delay(3000);
-        //await assetDatabase.ActivateGameScene();
     }
 }

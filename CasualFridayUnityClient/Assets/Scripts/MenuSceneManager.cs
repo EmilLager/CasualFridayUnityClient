@@ -6,6 +6,8 @@ public class MenuSceneManager : MonoBehaviour
 {
     private const string HighscoreKey = "Highscore";
     
+    //Would usually use some kind of DI instead of a direct reference and probably maintain a none-scene specific version of this component using a DontDestroyOnLoad
+    [SerializeField] private ScreenFade screenFade;
     [SerializeField] private Button playButton;
     [SerializeField] private TMP_Text highscoreText;
     [SerializeField] private string highscoreTextFormat;
@@ -22,11 +24,12 @@ public class MenuSceneManager : MonoBehaviour
     {
         highscoreText.text = string.Format(highscoreTextFormat, PlayerPrefs.GetInt(HighscoreKey, 0));
     }
-
-    //Method here for easy addition of button feedback if non-immediate transition is required  
+    
     private async void PlayButtonPressed()
     {
-        await assetReferenceDatabase.LoadGameScene();
+        await assetReferenceDatabase.LoadGameScene(false);
+        await screenFade.FadeImageAsync(0f, 1f);
+        await assetReferenceDatabase.ActivateGameScene();
     }
 
     private void OnDestroy()
