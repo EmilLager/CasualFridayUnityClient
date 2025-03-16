@@ -20,6 +20,10 @@ public class AssetReferenceDatabase : ScriptableObject
     [SerializeField] private List<AssetReferenceBallController> ballReferences;
 
     private Dictionary<int, BallController> ballPrefabDictionary;
+    
+    private AsyncOperationHandle<SceneInstance> menuSceneLoadHandle;
+    private AsyncOperationHandle<SceneInstance> gameSceneLoadHandle;
+    
     private SceneInstance menuSceneInstance;
     private SceneInstance gameSceneInstance;
 
@@ -32,7 +36,12 @@ public class AssetReferenceDatabase : ScriptableObject
     //In a real project I would try to load the game scene before transitioning to the menu scene
     public async Task LoadMenuScene(bool activate = true)
     {
-        menuSceneInstance = await LoadSceneAsync(menuSceneReference);
+        if (!menuSceneLoadHandle.IsValid())
+        {
+            menuSceneLoadHandle = await LoadSceneAsync(menuSceneReference);
+            menuSceneInstance = menuSceneLoadHandle.Result;
+        }
+
         if (activate)
         {
             menuSceneInstance.ActivateAsync();    
@@ -41,7 +50,11 @@ public class AssetReferenceDatabase : ScriptableObject
     
     public async Task LoadGameScene(bool activate = true)
     {
-        gameSceneInstance = await LoadSceneAsync(gameSceneReference);
+        if (!gameSceneLoadHandle.IsValid())
+        {
+            gameSceneLoadHandle = await LoadSceneAsync(gameSceneReference);
+            gameSceneInstance = gameSceneLoadHandle.Result;
+        }
         if (activate)
         {
             gameSceneInstance.ActivateAsync();    
@@ -77,10 +90,10 @@ public class AssetReferenceDatabase : ScriptableObject
         await Task.WhenAll(ballReferences.Select(LoadAssetAsync));
     }
     
-    private async Task<SceneInstance> LoadSceneAsync(AssetReference sceneReference)
+    private async Task<AsyncOperationHandle<SceneInstance>> LoadSceneAsync(AssetReference sceneReference)
     {
         var tcs = new TaskCompletionSource<SceneInstance>();
-        var sceneLoadHandle = sceneReference.LoadSceneAsync(LoadSceneMode.Single, false);
+        AsyncOperationHandle<SceneInstance> sceneLoadHandle = sceneReference.LoadSceneAsync(LoadSceneMode.Single, false);
 
         sceneLoadHandle.Completed += (handle) =>
         {
@@ -96,7 +109,7 @@ public class AssetReferenceDatabase : ScriptableObject
         };
 
         await tcs.Task;
-        return tcs.Task.Result;
+        return sceneLoadHandle;
     }
     
     private async Task<T> LoadAssetAsync<T>(AssetReferenceT<T> reference) where T : Object

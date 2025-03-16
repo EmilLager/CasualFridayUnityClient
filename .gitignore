@@ -76,3 +76,5 @@ crashlytics-build.properties
 /CasualFridayUnityClient/Temp
 /CasualFridayUnityClient/.idea
 /CasualFridayUnityClient/Logs
+/CasualFridayUnityClient/Assets/TextMesh Pro
+CasualFridayUnityClient/Assets/TextMesh Pro.meta
